@@ -5,6 +5,7 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -63,4 +64,8 @@ export async function getUserProfile(uid: string): Promise<UserProfile> {
     return snap.data() as UserProfile;
   }
   return { dailyCalorieGoal: 2000 };
+}
+
+export async function updateDailyCalorieGoal(uid: string, dailyCalorieGoal: number) {
+  await setDoc(doc(db, 'users', uid), { dailyCalorieGoal }, { merge: true });
 }
