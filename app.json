@@ -1,18 +1,19 @@
 {
   "expo": {
-    "name": "fitness-tracker-app",
-    "slug": "fitness-tracker-app",
+    "name": "StriveGen",
+    "slug": "strivegen",
     "version": "1.0.0",
-    "scheme": "fitnesstrackerapp",
+    "scheme": "strivegen",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0B0F",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B0B0F",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -29,6 +30,15 @@
         "expo-camera",
         {
           "cameraPermission": "Deze app gebruikt de camera om barcodes van voedingsproducten te scannen."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B0B0F",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain"
         }
       ]
     ]

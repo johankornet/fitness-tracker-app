@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, StyleSheet, ScrollView } from 'react-
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { addFoodEntry } from '../../src/firebase/diary';
+import { colors } from '../../src/theme/colors';
 
 export default function AddScreen() {
   const { user } = useAuth();
@@ -123,12 +124,14 @@ export default function AddScreen() {
       <TextInput
         style={styles.input}
         placeholder="Naam voedingsmiddel"
+        placeholderTextColor={colors.textMuted}
         value={foodName}
         onChangeText={setFoodName}
       />
       <TextInput
         style={styles.input}
         placeholder="Calorieën (kcal)"
+        placeholderTextColor={colors.textMuted}
         keyboardType="numeric"
         value={calories}
         onChangeText={setCalories}
@@ -137,6 +140,7 @@ export default function AddScreen() {
         <TextInput
           style={[styles.input, styles.macroInput]}
           placeholder="Eiwit (g)"
+          placeholderTextColor={colors.textMuted}
           keyboardType="numeric"
           value={protein}
           onChangeText={setProtein}
@@ -144,6 +148,7 @@ export default function AddScreen() {
         <TextInput
           style={[styles.input, styles.macroInput]}
           placeholder="Koolh. (g)"
+          placeholderTextColor={colors.textMuted}
           keyboardType="numeric"
           value={carbs}
           onChangeText={setCarbs}
@@ -151,6 +156,7 @@ export default function AddScreen() {
         <TextInput
           style={[styles.input, styles.macroInput]}
           placeholder="Vet (g)"
+          placeholderTextColor={colors.textMuted}
           keyboardType="numeric"
           value={fat}
           onChangeText={setFat}
@@ -167,34 +173,38 @@ export default function AddScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, gap: 12 },
+  container: { padding: 20, gap: 12, backgroundColor: colors.background, flexGrow: 1 },
   scanRow: { flexDirection: 'row', gap: 8 },
   scanButton: {
-    backgroundColor: '#111827',
-    borderRadius: 8,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
     padding: 14,
     alignItems: 'center',
   },
   scanButtonHalf: { flex: 1 },
-  scanButtonText: { color: '#fff', fontSize: 14, fontWeight: '600', textAlign: 'center' },
-  orText: { textAlign: 'center', color: '#6b7280', marginVertical: 4 },
-  barcodeTag: { textAlign: 'center', color: '#2563eb', fontWeight: '600' },
+  scanButtonText: { color: colors.textPrimary, fontSize: 14, fontWeight: '600', textAlign: 'center' },
+  orText: { textAlign: 'center', color: colors.textMuted, marginVertical: 4 },
+  barcodeTag: { textAlign: 'center', color: colors.accentLight, fontWeight: '600' },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
+    borderRadius: 10,
     padding: 12,
     fontSize: 16,
   },
   row: { flexDirection: 'row', gap: 8 },
   macroInput: { flex: 1 },
-  error: { color: '#dc2626' },
+  error: { color: colors.danger },
   saveButton: {
-    backgroundColor: '#2563eb',
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    borderRadius: 10,
     padding: 14,
     alignItems: 'center',
     marginTop: 8,
   },
-  saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  saveButtonText: { color: colors.white, fontSize: 16, fontWeight: '600' },
 });

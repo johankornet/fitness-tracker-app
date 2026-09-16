@@ -3,6 +3,7 @@ import { View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-nati
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { router } from 'expo-router';
 import { lookupProductByBarcode, ProductNotFoundError } from '../src/api/openFoodFacts';
+import { colors } from '../src/theme/colors';
 
 export default function ScannerScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -94,9 +95,16 @@ export default function ScannerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
-  message: { textAlign: 'center', fontSize: 16 },
+  container: { flex: 1, backgroundColor: colors.background },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12,
+    backgroundColor: colors.background,
+  },
+  message: { textAlign: 'center', fontSize: 16, color: colors.textPrimary },
   overlay: {
     flex: 1,
     alignItems: 'center',
@@ -106,39 +114,41 @@ const styles = StyleSheet.create({
     width: 260,
     height: 160,
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: colors.accentLight,
     borderRadius: 12,
   },
-  hint: { color: '#fff', marginTop: 16, fontSize: 14 },
+  hint: { color: colors.textPrimary, marginTop: 16, fontSize: 14 },
   loadingOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
   },
-  loadingText: { color: '#fff', fontSize: 16 },
+  loadingText: { color: colors.textPrimary, fontSize: 16 },
   errorBanner: {
     position: 'absolute',
     bottom: 40,
     left: 20,
     right: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     gap: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  errorText: { textAlign: 'center', color: '#111827' },
+  errorText: { textAlign: 'center', color: colors.textPrimary },
   button: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.accent,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
-  buttonText: { color: '#fff', fontWeight: '600' },
+  buttonText: { color: colors.white, fontWeight: '600' },
 });

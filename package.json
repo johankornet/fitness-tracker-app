@@ -10,6 +10,7 @@
     "expo-image-manipulator": "~57.0.18",
     "expo-linking": "~57.0.9",
     "expo-router": "~57.0.20",
+    "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "firebase": "^12.19.0",
     "react": "19.2.3",

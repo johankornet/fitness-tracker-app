@@ -10,6 +10,7 @@ import {
 } from '../../src/firebase/diary';
 import { signOut } from '../../src/firebase/auth';
 import type { FoodEntry } from '../../src/types/food';
+import { colors } from '../../src/theme/colors';
 
 export default function DiaryScreen() {
   const { user } = useAuth();
@@ -47,9 +48,9 @@ export default function DiaryScreen() {
       <View style={styles.summary}>
         <Text style={styles.summaryLabel}>Vandaag</Text>
         <Text style={styles.summaryCalories}>
-          {totalCalories} / {dailyGoal} kcal
+          {totalCalories} <Text style={styles.summaryCaloriesMuted}>/ {dailyGoal} kcal</Text>
         </Text>
-        <Text style={styles.summaryRemaining}>
+        <Text style={[styles.summaryRemaining, remaining < 0 && styles.summaryRemainingOver]}>
           {remaining >= 0 ? `${remaining} kcal over` : `${-remaining} kcal boven doel`}
         </Text>
         <Pressable onPress={openGoalEditor} hitSlop={8}>
@@ -63,6 +64,7 @@ export default function DiaryScreen() {
             <Text style={styles.modalTitle}>Dagelijks caloriedoel</Text>
             <TextInput
               style={styles.modalInput}
+              placeholderTextColor={colors.textMuted}
               keyboardType="numeric"
               value={goalInput}
               onChangeText={setGoalInput}
@@ -117,17 +119,21 @@ export default function DiaryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: colors.background },
   summary: {
     padding: 20,
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
     alignItems: 'center',
   },
-  summaryLabel: { color: '#dbeafe', fontSize: 14 },
-  summaryCalories: { color: '#fff', fontSize: 28, fontWeight: '700', marginTop: 4 },
-  summaryRemaining: { color: '#dbeafe', fontSize: 14, marginTop: 4 },
+  summaryLabel: { color: colors.textSecondary, fontSize: 14 },
+  summaryCalories: { color: colors.textPrimary, fontSize: 30, fontWeight: '700', marginTop: 4 },
+  summaryCaloriesMuted: { color: colors.textSecondary, fontSize: 18, fontWeight: '400' },
+  summaryRemaining: { color: colors.success, fontSize: 14, marginTop: 4, fontWeight: '600' },
+  summaryRemainingOver: { color: colors.danger },
   editGoalLink: {
-    color: '#dbeafe',
+    color: colors.accentLight,
     fontSize: 13,
     fontWeight: '600',
     textDecorationLine: 'underline',
@@ -135,42 +141,53 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCard: {
     width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
     padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12 },
+  modalTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12, color: colors.textPrimary },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
+    color: colors.textPrimary,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
   },
   modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 16 },
   modalCancel: { paddingVertical: 10, paddingHorizontal: 16 },
-  modalCancelText: { color: '#6b7280', fontWeight: '600' },
-  modalSave: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 16 },
-  modalSaveText: { color: '#fff', fontWeight: '600' },
+  modalCancelText: { color: colors.textSecondary, fontWeight: '600' },
+  modalSave: {
+    backgroundColor: colors.accent,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  modalSaveText: { color: colors.white, fontWeight: '600' },
   list: { padding: 16, gap: 8 },
-  empty: { textAlign: 'center', color: '#6b7280', marginTop: 32 },
+  empty: { textAlign: 'center', color: colors.textMuted, marginTop: 32 },
   entryRow: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#f3f4f6',
+    borderRadius: 10,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     marginBottom: 8,
   },
-  entryName: { fontSize: 16, fontWeight: '600' },
-  entryMacros: { fontSize: 12, color: '#6b7280', marginTop: 2 },
-  entryCalories: { fontSize: 16, fontWeight: '700', color: '#2563eb' },
+  entryName: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
+  entryMacros: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
+  entryCalories: { fontSize: 16, fontWeight: '700', color: colors.accentLight },
   signOut: { padding: 16, alignItems: 'center' },
-  signOutText: { color: '#dc2626', fontWeight: '600' },
+  signOutText: { color: colors.danger, fontWeight: '600' },
 });

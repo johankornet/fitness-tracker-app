@@ -1,4 +1,6 @@
-# Fitness Tracker App (foundation)
+# StriveGen (foundation)
+
+_Train smarter. Eat better. Evolve. All powered by AI and your dedication._
 
 Een eerste basisversie van een MyFitnessPal-achtige app: gebruikersaccounts, een
 voedingsdagboek met calorieën/macro's, handmatige invoer, een barcode-scanner
@@ -123,3 +125,12 @@ firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore r
 4. Maak een productie-build in Expo's cloud (geen lokale Mac nodig): `eas build --platform ios`.
 5. Upload de build naar App Store Connect: `eas submit --platform ios`.
 6. Vul in [App Store Connect](https://appstoreconnect.apple.com/) de listing aan: screenshots, beschrijving, privacybeleid (verplicht, omdat de app accountgegevens verwerkt) en dien de app in voor review.
+
+**App Store-tekst (alvast vastgelegd voor later):**
+> Train smarter. Eat better. Evolve. All powered by AI and your dedication.
+
+## 9. Vormgeving
+
+Donker, modern thema met paars/violet als merkkleur — zie [src/theme/colors.ts](src/theme/colors.ts)
+voor de volledige kleurenpalet. Het app-icoon/logo (drie oplopende staafjes, symbool voor
+groei/progressie) staat als SVG-bron niet in de repo; de gegenereerde PNG's staan in `assets/`.

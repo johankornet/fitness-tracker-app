@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Link, router } from 'expo-router';
 import { signUp } from '../../src/firebase/auth';
+import { BrandHeader } from '../../src/components/BrandHeader';
+import { colors } from '../../src/theme/colors';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -24,11 +26,12 @@ export default function SignupScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Account aanmaken</Text>
+      <BrandHeader />
 
       <TextInput
         style={styles.input}
         placeholder="E-mailadres"
+        placeholderTextColor={colors.textMuted}
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -37,6 +40,7 @@ export default function SignupScreen() {
       <TextInput
         style={styles.input}
         placeholder="Wachtwoord (min. 6 tekens)"
+        placeholderTextColor={colors.textMuted}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -56,23 +60,30 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, gap: 12 },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 16 },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12,
+    backgroundColor: colors.background,
+  },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
+    borderRadius: 10,
+    padding: 14,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#2563eb',
-    borderRadius: 8,
+    backgroundColor: colors.accent,
+    borderRadius: 10,
     padding: 14,
     alignItems: 'center',
     marginTop: 8,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  error: { color: '#dc2626' },
-  link: { marginTop: 16, textAlign: 'center', color: '#2563eb' },
+  buttonText: { color: colors.white, fontSize: 16, fontWeight: '600' },
+  error: { color: colors.danger },
+  link: { marginTop: 16, textAlign: 'center', color: colors.accentLight },
 });
