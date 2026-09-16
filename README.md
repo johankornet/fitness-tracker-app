@@ -5,8 +5,9 @@ _Train smarter. Eat better. Evolve. All powered by AI and your dedication._
 Een eerste basisversie van een MyFitnessPal-achtige app: gebruikersaccounts, een
 voedingsdagboek met calorieën/macro's, handmatige invoer, een barcode-scanner
 die productgegevens ophaalt via [Open Food Facts](https://world.openfoodfacts.org/),
-en een AI-fotoherkenning die een foto van een maaltijd analyseert en de
-voedingswaarde schat (Google Gemini via een Firebase Cloud Function).
+een AI-fotoherkenning die een foto van een maaltijd analyseert en de
+voedingswaarde schat, en een trainingenmenu (vaste catalogus + AI-gegenereerde
+workouts) — beide AI-features via Google Gemini in een Firebase Cloud Function.
 
 **Stack:** Expo (React Native + TypeScript) met Expo Router, Firebase (Auth + Firestore
 + Cloud Functions). Gekozen zodat je vanaf Windows kunt ontwikkelen en later zonder Mac
@@ -66,9 +67,10 @@ krijgt) en een gratis Gemini API-sleutel.
    firebase deploy --only functions
    ```
 
-Na een succesvolle deploy is `estimateMealFromPhoto` actief en kan de app-knop "Foto van
-maaltijd" gebruikt worden. Er geldt een ingebouwde limiet van 20 foto-scans per gebruiker
-per dag om onverwacht hoge kosten te voorkomen (zie `functions/index.js`).
+Na een succesvolle deploy zijn `estimateMealFromPhoto` (foto → voedingswaarde) én
+`generateWorkout` (sport + doel → training) actief. Beide hebben een ingebouwde limiet
+van 20 aanroepen per gebruiker per dag om onverwacht hoge kosten te voorkomen (zie
+`functions/index.js`).
 
 ## 5. App starten en testen
 
@@ -89,7 +91,10 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
    bevestig dat de productgegevens correct worden voorgevuld en opgeslagen.
 5. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
    AI-schatting (naam, calorieën, macro's, zekerheid) correct wordt voorgevuld.
-6. Log uit en weer in — de gegevens moeten behouden blijven (Firestore).
+6. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst.
+7. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
+   training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
+8. Log uit en weer in — alle gegevens (dagboek én trainingen) moeten behouden blijven.
 
 ## 6. Projectstructuur
 
@@ -99,14 +104,19 @@ app/                  Schermen (Expo Router file-based routing)
   (auth)/signup.tsx     Registreren
   (tabs)/diary.tsx      Dagboek: entries + totaal vs. doel + doel aanpassen
   (tabs)/add.tsx        Handmatige invoer / voorbeeld vanuit scanner of foto
+  (tabs)/workouts.tsx   Trainingenlijst: filter op sport/doel, vast + AI-opgeslagen
   scanner.tsx           Camera + barcode -> Open Food Facts
   photo-scan.tsx        Camera + foto -> AI-schatting (Cloud Function)
+  workout-detail.tsx    Details van één training + verwijderen (AI-workouts)
+  ai-workout.tsx        Sport + doel -> AI-training (Cloud Function) + bewaren
 src/
-  firebase/            Firebase-init, auth-, Firestore- en Functions-helpers
+  firebase/            Firebase-init, auth-, Firestore-, Functions- en workouts-helpers
   api/openFoodFacts.ts  Barcode -> productdata
   context/AuthContext.tsx  Ingelogde gebruiker
-  types/food.ts         Gedeelde TypeScript-types
-functions/              Firebase Cloud Function (estimateMealFromPhoto -> Gemini)
+  data/workouts.ts      Vaste trainingscatalogus (18 workouts)
+  types/food.ts         Gedeelde TypeScript-types (voeding)
+  types/workout.ts       Gedeelde TypeScript-types (trainingen)
+functions/              Firebase Cloud Functions (estimateMealFromPhoto + generateWorkout -> Gemini)
 firestore.rules         Beveiligingsregels (plak in Firebase console)
 firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore rules)
 ```
@@ -114,7 +124,7 @@ firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore r
 ## 7. Wat zit er nog niet in (bewust buiten scope van deze basis)
 
 - Uitgebreid gebruikersprofiel / persoonlijke doelen-scherm (nu: alleen het caloriedoel, aan te passen via "Doel aanpassen" op het Dagboek-scherm)
-- Beweging/workout-tracking
+- Koppeling tussen voltooide trainingen en het caloriedagboek (bewust los gehouden — verbrande calorieën schatten is onnauwkeurig)
 - Zoeken in een voedingsdatabase (naast barcode-lookup, handmatige invoer en AI-fotoherkenning)
 
 ## 8. Roadmap: publiceren naar de App Store (zonder Mac)
