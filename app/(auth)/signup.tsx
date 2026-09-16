@@ -16,7 +16,7 @@ export default function SignupScreen() {
     setSubmitting(true);
     try {
       await signUp(email.trim(), password);
-      router.replace('/(tabs)/diary');
+      router.replace('/(tabs)/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registreren mislukt');
     } finally {

@@ -14,7 +14,7 @@ export default function Index() {
     );
   }
 
-  return <Redirect href={user ? '/(tabs)/diary' : '/(auth)/login'} />;
+  return <Redirect href={user ? '/(tabs)/home' : '/(auth)/login'} />;
 }
 
 const styles = StyleSheet.create({

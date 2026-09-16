@@ -13,6 +13,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.textMuted,
       }}
     >
+      <Tabs.Screen name="home" options={{ title: 'Home' }} />
       <Tabs.Screen name="diary" options={{ title: 'Dagboek' }} />
       <Tabs.Screen name="add" options={{ title: 'Toevoegen' }} />
       <Tabs.Screen name="workouts" options={{ title: 'Trainingen' }} />

@@ -38,6 +38,10 @@ export default function RootLayout() {
             name="ai-workout"
             options={{ ...modalHeaderOptions, title: 'AI-training' }}
           />
+          <Stack.Screen
+            name="edit-profile"
+            options={{ ...modalHeaderOptions, title: 'Profiel bewerken' }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

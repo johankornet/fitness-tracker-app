@@ -16,7 +16,7 @@ export default function LoginScreen() {
     setSubmitting(true);
     try {
       await signIn(email.trim(), password);
-      router.replace('/(tabs)/diary');
+      router.replace('/(tabs)/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Inloggen mislukt');
     } finally {

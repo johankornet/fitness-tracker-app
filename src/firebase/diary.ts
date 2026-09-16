@@ -1,17 +1,6 @@
-import {
-  collection,
-  onSnapshot,
-  addDoc,
-  deleteDoc,
-  doc,
-  getDoc,
-  setDoc,
-  query,
-  where,
-  orderBy,
-} from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy } from 'firebase/firestore';
 import { db } from './config';
-import type { FoodEntry, NewFoodEntry, UserProfile } from '../types/food';
+import type { FoodEntry, NewFoodEntry } from '../types/food';
 
 function startOfToday(): number {
   const now = new Date();
@@ -56,16 +45,4 @@ export async function addFoodEntry(uid: string, entry: NewFoodEntry) {
 
 export async function deleteFoodEntry(uid: string, entryId: string) {
   await deleteDoc(doc(db, 'users', uid, 'entries', entryId));
-}
-
-export async function getUserProfile(uid: string): Promise<UserProfile> {
-  const snap = await getDoc(doc(db, 'users', uid));
-  if (snap.exists()) {
-    return snap.data() as UserProfile;
-  }
-  return { dailyCalorieGoal: 2000 };
-}
-
-export async function updateDailyCalorieGoal(uid: string, dailyCalorieGoal: number) {
-  await setDoc(doc(db, 'users', uid), { dailyCalorieGoal }, { merge: true });
 }

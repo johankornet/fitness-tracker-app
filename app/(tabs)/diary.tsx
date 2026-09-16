@@ -2,12 +2,8 @@ import { useEffect, useState } from 'react';
 import { View, Text, FlatList, Pressable, StyleSheet, Modal, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
-import {
-  subscribeToTodayEntries,
-  deleteFoodEntry,
-  getUserProfile,
-  updateDailyCalorieGoal,
-} from '../../src/firebase/diary';
+import { subscribeToTodayEntries, deleteFoodEntry } from '../../src/firebase/diary';
+import { getUserProfile, updateUserProfile } from '../../src/firebase/profile';
 import { signOut } from '../../src/firebase/auth';
 import type { FoodEntry } from '../../src/types/food';
 import { colors } from '../../src/theme/colors';
@@ -38,7 +34,7 @@ export default function DiaryScreen() {
     if (!user) return;
     const parsed = Number(goalInput);
     if (!Number.isFinite(parsed) || parsed <= 0) return;
-    await updateDailyCalorieGoal(user.uid, parsed);
+    await updateUserProfile(user.uid, { dailyCalorieGoal: parsed });
     setDailyGoal(parsed);
     setEditingGoal(false);
   }

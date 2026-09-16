@@ -24,10 +24,6 @@ export interface NewFoodEntry {
   barcode?: string;
 }
 
-export interface UserProfile {
-  dailyCalorieGoal: number;
-}
-
 export interface OpenFoodFactsProduct {
   barcode: string;
   name: string;
