@@ -81,16 +81,19 @@ async function estimateMealFromPhotoHandler(request) {
   }
 
   const result = await response.json();
-  if (!result.output_text) {
+  const modelOutputStep = (result.steps || []).find((step) => step.type === 'model_output');
+  const textContent = modelOutputStep?.content?.find((item) => item.type === 'text')?.text;
+
+  if (!textContent) {
     console.error('Onverwacht Gemini-antwoord', JSON.stringify(result));
     throw new HttpsError('internal', 'Geen bruikbaar antwoord van AI ontvangen.');
   }
 
   let parsed;
   try {
-    parsed = JSON.parse(result.output_text);
+    parsed = JSON.parse(textContent);
   } catch (err) {
-    console.error('Kon Gemini-antwoord niet parsen', result.output_text);
+    console.error('Kon Gemini-antwoord niet parsen', textContent);
     throw new HttpsError('internal', 'Kon AI-antwoord niet verwerken.');
   }
 
