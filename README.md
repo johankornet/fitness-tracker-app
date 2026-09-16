@@ -92,10 +92,13 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
    sport en doel in — controleer dat dit daarna klopt op Home.
 3. Controleer dat het AI-weekoverzicht bovenaan Home verschijnt (eerste keer duurt
    een paar seconden; daarna direct zichtbaar zolang het dezelfde dag is).
-5. Gebruik de snelkoppelingen op Home naar "Logboek" en "Trainingen".
-6. Ga naar "Toevoegen" en log een maaltijd handmatig in.
-7. Controleer dat het dagtotaal op "Dagboek" klopt, en test "Doel aanpassen" om het
-   caloriedoel te wijzigen (dit is hetzelfde veld als op Home/profiel).
+4. Gebruik de snelkoppelingen op Home naar "Logboek", "Trainingen" en "Instellingen".
+5. Op "Dagboek": tik op de ronde plusknop rechtsonder, of op "Snel toevoegen aan ..."
+   onder een van de secties (Ontbijt/Lunch/Diner/Snacks) — controleer dat de juiste
+   maaltijd al is voorgeselecteerd op het Toevoegen-scherm.
+6. Log een maaltijd handmatig in en controleer dat 'm in de juiste sectie verschijnt,
+   en dat het dagtotaal én de sectie-subtotalen kloppen.
+7. Test "Doel aanpassen" om het caloriedoel te wijzigen (hetzelfde veld als op Home/profiel).
 8. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
    bevestig dat de productgegevens correct worden voorgevuld en opgeslagen.
 9. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
@@ -104,11 +107,10 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
     en tik op "Markeer als voltooid".
 11. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
     training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
-12. Log uit en weer in — alle gegevens (profiel, dagboek, trainingen én weekoverzicht)
+12. Ga naar "Instellingen": test "Wachtwoord wijzigen" (vereist je huidige wachtwoord)
+    en controleer dat "Profiel bewerken" naar hetzelfde scherm gaat als vanaf Home.
+13. Log uit en weer in — alle gegevens (profiel, dagboek, trainingen én weekoverzicht)
     moeten behouden blijven.
-13. Ga naar "Instellingen" (tandwiel-tab, of de kaart op Home): test "Wachtwoord wijzigen"
-    (vereist je huidige wachtwoord) en controleer dat "Profiel bewerken" naar hetzelfde
-    scherm gaat als vanaf Home.
 
 ## 6. Projectstructuur
 
@@ -117,7 +119,8 @@ app/                  Schermen (Expo Router file-based routing)
   (auth)/login.tsx     Inloggen
   (auth)/signup.tsx     Registreren
   (tabs)/home.tsx       Home (eerste scherm na inloggen): profieloverzicht + snelkoppelingen
-  (tabs)/diary.tsx      Dagboek: entries + totaal vs. doel + doel aanpassen
+  (tabs)/diary.tsx      Dagboek: secties (ontbijt/lunch/diner/snacks), totaal vs. doel,
+                       doel aanpassen, ronde plusknop
   (tabs)/add.tsx        Handmatige invoer / voorbeeld vanuit scanner of foto
   (tabs)/workouts.tsx   Trainingenlijst: filter op sport/doel, vast + AI-opgeslagen
   scanner.tsx           Camera + barcode -> Open Food Facts
