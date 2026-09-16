@@ -83,18 +83,21 @@ Camera-app en tik op de melding; op Android: scan direct vanuit Expo Go). Zorg d
 telefoon en computer op hetzelfde wifinetwerk zitten.
 
 **Test de golden path:**
-1. Registreer een account (e-mail + wachtwoord).
-2. Ga naar "Toevoegen" en log een maaltijd handmatig in.
-3. Controleer dat het dagtotaal op "Dagboek" klopt, en test "Doel aanpassen" om het
-   caloriedoel te wijzigen.
-4. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
+1. Registreer een account (e-mail + wachtwoord) — je komt na inloggen direct op **Home**.
+2. Tik op "Bewerken" op het profielkaartje en vul naam, leeftijd, lengte, gewicht,
+   sport en doel in — controleer dat dit daarna klopt op Home.
+3. Gebruik de snelkoppelingen op Home naar "Logboek" en "Trainingen".
+4. Ga naar "Toevoegen" en log een maaltijd handmatig in.
+5. Controleer dat het dagtotaal op "Dagboek" klopt, en test "Doel aanpassen" om het
+   caloriedoel te wijzigen (dit is hetzelfde veld als op Home/profiel).
+6. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
    bevestig dat de productgegevens correct worden voorgevuld en opgeslagen.
-5. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
+7. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
    AI-schatting (naam, calorieën, macro's, zekerheid) correct wordt voorgevuld.
-6. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst.
-7. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
+8. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst.
+9. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
    training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
-8. Log uit en weer in — alle gegevens (dagboek én trainingen) moeten behouden blijven.
+10. Log uit en weer in — alle gegevens (profiel, dagboek én trainingen) moeten behouden blijven.
 
 ## 6. Projectstructuur
 
@@ -102,6 +105,7 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
 app/                  Schermen (Expo Router file-based routing)
   (auth)/login.tsx     Inloggen
   (auth)/signup.tsx     Registreren
+  (tabs)/home.tsx       Home (eerste scherm na inloggen): profieloverzicht + snelkoppelingen
   (tabs)/diary.tsx      Dagboek: entries + totaal vs. doel + doel aanpassen
   (tabs)/add.tsx        Handmatige invoer / voorbeeld vanuit scanner of foto
   (tabs)/workouts.tsx   Trainingenlijst: filter op sport/doel, vast + AI-opgeslagen
@@ -109,13 +113,15 @@ app/                  Schermen (Expo Router file-based routing)
   photo-scan.tsx        Camera + foto -> AI-schatting (Cloud Function)
   workout-detail.tsx    Details van één training + verwijderen (AI-workouts)
   ai-workout.tsx        Sport + doel -> AI-training (Cloud Function) + bewaren
+  edit-profile.tsx      Naam/leeftijd/lengte/gewicht/sport/doel/caloriedoel bewerken
 src/
-  firebase/            Firebase-init, auth-, Firestore-, Functions- en workouts-helpers
+  firebase/            Firebase-init, auth-, Firestore-, Functions-, workouts- en profile-helpers
   api/openFoodFacts.ts  Barcode -> productdata
   context/AuthContext.tsx  Ingelogde gebruiker
   data/workouts.ts      Vaste trainingscatalogus (18 workouts)
   types/food.ts         Gedeelde TypeScript-types (voeding)
   types/workout.ts       Gedeelde TypeScript-types (trainingen)
+  types/profile.ts       Gedeeld TypeScript-type (gebruikersprofiel)
 functions/              Firebase Cloud Functions (estimateMealFromPhoto + generateWorkout -> Gemini)
 firestore.rules         Beveiligingsregels (plak in Firebase console)
 firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore rules)
@@ -123,9 +129,9 @@ firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore r
 
 ## 7. Wat zit er nog niet in (bewust buiten scope van deze basis)
 
-- Uitgebreid gebruikersprofiel / persoonlijke doelen-scherm (nu: alleen het caloriedoel, aan te passen via "Doel aanpassen" op het Dagboek-scherm)
 - Koppeling tussen voltooide trainingen en het caloriedagboek (bewust los gehouden — verbrande calorieën schatten is onnauwkeurig)
 - Zoeken in een voedingsdatabase (naast barcode-lookup, handmatige invoer en AI-fotoherkenning)
+- Automatische berekening van een aanbevolen caloriedoel op basis van leeftijd/lengte/gewicht (nu: handmatig invullen)
 
 ## 8. Roadmap: publiceren naar de App Store (zonder Mac)
 
@@ -142,5 +148,5 @@ firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore r
 ## 9. Vormgeving
 
 Donker, modern thema met paars/violet als merkkleur — zie [src/theme/colors.ts](src/theme/colors.ts)
-voor de volledige kleurenpalet. Het app-icoon/logo (drie oplopende staafjes, symbool voor
-groei/progressie) staat als SVG-bron niet in de repo; de gegenereerde PNG's staan in `assets/`.
+voor de volledige kleurenpalet. Het app-icoon/logo (hartslaglijn) staat als SVG-bron niet in
+de repo; de gegenereerde PNG's staan in `assets/`.
