@@ -7,9 +7,10 @@ voedingsdagboek met calorieën/macro's, handmatige invoer, een barcode-scanner
 die productgegevens ophaalt via [Open Food Facts](https://world.openfoodfacts.org/),
 een AI-fotoherkenning die een foto van een maaltijd analyseert en de
 voedingswaarde schat, een trainingenmenu (vaste catalogus + AI-gegenereerde
-workouts), en een Home-scherm met een AI-weekoverzicht (motiverende tekst op
-basis van hoe actief je was, hoe vaak je hebt gelogd en getraind) — alle
-AI-features via Google Gemini in Firebase Cloud Functions.
+workouts), een Home-scherm met een AI-weekoverzicht (motiverende tekst op
+basis van hoe actief je was, hoe vaak je hebt gelogd en getraind), en een
+vasten-tracker op het Dagboek-scherm — alle AI-features via Google Gemini in
+Firebase Cloud Functions.
 
 **Stack:** Expo (React Native + TypeScript) met Expo Router, Firebase (Auth + Firestore
 + Cloud Functions). Gekozen zodat je vanaf Windows kunt ontwikkelen en later zonder Mac
@@ -98,18 +99,21 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
    maaltijd al is voorgeselecteerd op het Toevoegen-scherm.
 6. Log een maaltijd handmatig in en controleer dat 'm in de juiste sectie verschijnt,
    en dat het dagtotaal én de sectie-subtotalen kloppen.
-7. Test "Doel aanpassen" om het caloriedoel te wijzigen (hetzelfde veld als op Home/profiel).
-8. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
+7. Controleer de vasten-kaart bovenaan Dagboek: na het loggen van die maaltijd hoort
+   de teller net gereset te zijn. Tik daarna op "Start vasten" en controleer dat de
+   teller weer op 0 begint.
+8. Test "Doel aanpassen" om het caloriedoel te wijzigen (hetzelfde veld als op Home/profiel).
+9. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
    bevestig dat de productgegevens correct worden voorgevuld en opgeslagen.
-9. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
-   AI-schatting (naam, calorieën, macro's, zekerheid) correct wordt voorgevuld.
-10. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst,
+10. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
+    AI-schatting (naam, calorieën, macro's, zekerheid) correct wordt voorgevuld.
+11. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst,
     en tik op "Markeer als voltooid".
-11. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
+12. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
     training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
-12. Ga naar "Instellingen": test "Wachtwoord wijzigen" (vereist je huidige wachtwoord)
+13. Ga naar "Instellingen": test "Wachtwoord wijzigen" (vereist je huidige wachtwoord)
     en controleer dat "Profiel bewerken" naar hetzelfde scherm gaat als vanaf Home.
-13. Log uit en weer in — alle gegevens (profiel, dagboek, trainingen én weekoverzicht)
+14. Log uit en weer in — alle gegevens (profiel, dagboek, trainingen én weekoverzicht)
     moeten behouden blijven.
 
 ## 6. Projectstructuur
@@ -119,8 +123,8 @@ app/                  Schermen (Expo Router file-based routing)
   (auth)/login.tsx     Inloggen
   (auth)/signup.tsx     Registreren
   (tabs)/home.tsx       Home (eerste scherm na inloggen): profieloverzicht + snelkoppelingen
-  (tabs)/diary.tsx      Dagboek: secties (ontbijt/lunch/diner/snacks), totaal vs. doel,
-                       doel aanpassen, ronde plusknop
+  (tabs)/diary.tsx      Dagboek: vasten-tracker, secties (ontbijt/lunch/diner/snacks),
+                       totaal vs. doel, doel aanpassen, ronde plusknop
   (tabs)/add.tsx        Handmatige invoer / voorbeeld vanuit scanner of foto
   (tabs)/workouts.tsx   Trainingenlijst: filter op sport/doel, vast + AI-opgeslagen
   scanner.tsx           Camera + barcode -> Open Food Facts
@@ -132,11 +136,12 @@ app/                  Schermen (Expo Router file-based routing)
   change-password.tsx   Wachtwoord wijzigen (met re-authenticatie)
 src/
   firebase/            Firebase-init, auth-, Firestore-, Functions-, workouts-, profile-,
-                       activity- en insights-helpers
+                       activity-, insights- en fasting-helpers
   api/openFoodFacts.ts  Barcode -> productdata
   context/AuthContext.tsx  Ingelogde gebruiker + registreert dagelijkse activiteit
   data/workouts.ts      Vaste trainingscatalogus (18 workouts)
-  types/food.ts         Gedeelde TypeScript-types (voeding)
+  data/fastingMilestones.ts  Vaste mijlpalen-tabel voor vasten-gezondheidsinfo
+  types/food.ts         Gedeelde TypeScript-types (voeding + maaltijdtypes)
   types/workout.ts       Gedeelde TypeScript-types (trainingen)
   types/profile.ts       Gedeeld TypeScript-type (gebruikersprofiel)
 functions/              Firebase Cloud Functions (estimateMealFromPhoto + generateWorkout +
