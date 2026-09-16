@@ -16,6 +16,10 @@ export default function RootLayout() {
             name="scanner"
             options={{ presentation: 'modal', headerShown: true, title: 'Scan barcode' }}
           />
+          <Stack.Screen
+            name="photo-scan"
+            options={{ presentation: 'modal', headerShown: true, title: 'Foto van maaltijd' }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

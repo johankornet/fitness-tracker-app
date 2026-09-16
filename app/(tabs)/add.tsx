@@ -13,6 +13,7 @@ export default function AddScreen() {
     carbs?: string;
     fat?: string;
     barcode?: string;
+    photoConfidence?: string;
   }>();
 
   const [foodName, setFoodName] = useState('');
@@ -21,6 +22,7 @@ export default function AddScreen() {
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [barcode, setBarcode] = useState<string | undefined>(undefined);
+  const [photoConfidence, setPhotoConfidence] = useState<string | undefined>(undefined);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +33,16 @@ export default function AddScreen() {
     if (params.carbs) setCarbs(params.carbs);
     if (params.fat) setFat(params.fat);
     if (params.barcode) setBarcode(params.barcode);
-  }, [params.name, params.calories, params.protein, params.carbs, params.fat, params.barcode]);
+    if (params.photoConfidence) setPhotoConfidence(params.photoConfidence);
+  }, [
+    params.name,
+    params.calories,
+    params.protein,
+    params.carbs,
+    params.fat,
+    params.barcode,
+    params.photoConfidence,
+  ]);
 
   function resetForm() {
     setFoodName('');
@@ -40,7 +51,16 @@ export default function AddScreen() {
     setCarbs('');
     setFat('');
     setBarcode(undefined);
-    router.setParams({ name: '', calories: '', protein: '', carbs: '', fat: '', barcode: '' });
+    setPhotoConfidence(undefined);
+    router.setParams({
+      name: '',
+      calories: '',
+      protein: '',
+      carbs: '',
+      fat: '',
+      barcode: '',
+      photoConfidence: '',
+    });
   }
 
   async function handleSave() {
@@ -62,7 +82,7 @@ export default function AddScreen() {
         carbs: Number(carbs) || 0,
         fat: Number(fat) || 0,
         servingQty: 1,
-        source: barcode ? 'barcode' : 'manual',
+        source: barcode ? 'barcode' : photoConfidence ? 'photo' : 'manual',
         ...(barcode ? { barcode } : {}),
       });
       resetForm();
@@ -76,13 +96,29 @@ export default function AddScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Pressable style={styles.scanButton} onPress={() => router.push('/scanner')}>
-        <Text style={styles.scanButtonText}>📷 Scan barcode</Text>
-      </Pressable>
+      <View style={styles.scanRow}>
+        <Pressable
+          style={[styles.scanButton, styles.scanButtonHalf]}
+          onPress={() => router.push('/scanner')}
+        >
+          <Text style={styles.scanButtonText}>📷 Scan barcode</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.scanButton, styles.scanButtonHalf]}
+          onPress={() => router.push('/photo-scan')}
+        >
+          <Text style={styles.scanButtonText}>📸 Foto van maaltijd</Text>
+        </Pressable>
+      </View>
 
       <Text style={styles.orText}>— of vul handmatig in —</Text>
 
       {barcode && <Text style={styles.barcodeTag}>Barcode: {barcode}</Text>}
+      {photoConfidence && (
+        <Text style={styles.barcodeTag}>
+          AI-schatting op basis van foto (zekerheid: {photoConfidence})
+        </Text>
+      )}
 
       <TextInput
         style={styles.input}
@@ -132,13 +168,15 @@ export default function AddScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 12 },
+  scanRow: { flexDirection: 'row', gap: 8 },
   scanButton: {
     backgroundColor: '#111827',
     borderRadius: 8,
     padding: 14,
     alignItems: 'center',
   },
-  scanButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  scanButtonHalf: { flex: 1 },
+  scanButtonText: { color: '#fff', fontSize: 14, fontWeight: '600', textAlign: 'center' },
   orText: { textAlign: 'center', color: '#6b7280', marginVertical: 4 },
   barcodeTag: { textAlign: 'center', color: '#2563eb', fontWeight: '600' },
   input: {
