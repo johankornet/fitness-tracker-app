@@ -6,8 +6,10 @@ Een eerste basisversie van een MyFitnessPal-achtige app: gebruikersaccounts, een
 voedingsdagboek met calorieën/macro's, handmatige invoer, een barcode-scanner
 die productgegevens ophaalt via [Open Food Facts](https://world.openfoodfacts.org/),
 een AI-fotoherkenning die een foto van een maaltijd analyseert en de
-voedingswaarde schat, en een trainingenmenu (vaste catalogus + AI-gegenereerde
-workouts) — beide AI-features via Google Gemini in een Firebase Cloud Function.
+voedingswaarde schat, een trainingenmenu (vaste catalogus + AI-gegenereerde
+workouts), en een Home-scherm met een AI-weekoverzicht (motiverende tekst op
+basis van hoe actief je was, hoe vaak je hebt gelogd en getraind) — alle
+AI-features via Google Gemini in Firebase Cloud Functions.
 
 **Stack:** Expo (React Native + TypeScript) met Expo Router, Firebase (Auth + Firestore
 + Cloud Functions). Gekozen zodat je vanaf Windows kunt ontwikkelen en later zonder Mac
@@ -67,10 +69,12 @@ krijgt) en een gratis Gemini API-sleutel.
    firebase deploy --only functions
    ```
 
-Na een succesvolle deploy zijn `estimateMealFromPhoto` (foto → voedingswaarde) én
-`generateWorkout` (sport + doel → training) actief. Beide hebben een ingebouwde limiet
-van 20 aanroepen per gebruiker per dag om onverwacht hoge kosten te voorkomen (zie
-`functions/index.js`).
+Na een succesvolle deploy zijn `estimateMealFromPhoto` (foto → voedingswaarde),
+`generateWorkout` (sport + doel → training) én `generateWeeklyInsight` (weekstatistieken
+→ motiverende tekst) actief. De eerste twee hebben een limiet van 20 aanroepen per
+gebruiker per dag; `generateWeeklyInsight` genereert maar één keer per dag per gebruiker
+(daarna leest de app het resultaat rechtstreeks uit Firestore, geen extra AI-kosten) —
+zie `functions/index.js`.
 
 ## 5. App starten en testen
 
@@ -86,18 +90,22 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
 1. Registreer een account (e-mail + wachtwoord) — je komt na inloggen direct op **Home**.
 2. Tik op "Bewerken" op het profielkaartje en vul naam, leeftijd, lengte, gewicht,
    sport en doel in — controleer dat dit daarna klopt op Home.
-3. Gebruik de snelkoppelingen op Home naar "Logboek" en "Trainingen".
-4. Ga naar "Toevoegen" en log een maaltijd handmatig in.
-5. Controleer dat het dagtotaal op "Dagboek" klopt, en test "Doel aanpassen" om het
+3. Controleer dat het AI-weekoverzicht bovenaan Home verschijnt (eerste keer duurt
+   een paar seconden; daarna direct zichtbaar zolang het dezelfde dag is).
+5. Gebruik de snelkoppelingen op Home naar "Logboek" en "Trainingen".
+6. Ga naar "Toevoegen" en log een maaltijd handmatig in.
+7. Controleer dat het dagtotaal op "Dagboek" klopt, en test "Doel aanpassen" om het
    caloriedoel te wijzigen (dit is hetzelfde veld als op Home/profiel).
-6. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
+8. Tik op "Scan barcode", scan een verpakking met barcode (bv. een pak koekjes) en
    bevestig dat de productgegevens correct worden voorgevuld en opgeslagen.
-7. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
+9. Tik op "Foto van maaltijd", maak een foto van iets eetbaars en bevestig dat de
    AI-schatting (naam, calorieën, macro's, zekerheid) correct wordt voorgevuld.
-8. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst.
-9. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
-   training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
-10. Log uit en weer in — alle gegevens (profiel, dagboek én trainingen) moeten behouden blijven.
+10. Ga naar "Trainingen": filter op sport/doel, open een training uit de vaste lijst,
+    en tik op "Markeer als voltooid".
+11. Tik op "Laat AI een training maken", kies sport + doel, genereer, en bewaar de
+    training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
+12. Log uit en weer in — alle gegevens (profiel, dagboek, trainingen én weekoverzicht)
+    moeten behouden blijven.
 
 ## 6. Projectstructuur
 
@@ -115,14 +123,16 @@ app/                  Schermen (Expo Router file-based routing)
   ai-workout.tsx        Sport + doel -> AI-training (Cloud Function) + bewaren
   edit-profile.tsx      Naam/leeftijd/lengte/gewicht/sport/doel/caloriedoel bewerken
 src/
-  firebase/            Firebase-init, auth-, Firestore-, Functions-, workouts- en profile-helpers
+  firebase/            Firebase-init, auth-, Firestore-, Functions-, workouts-, profile-,
+                       activity- en insights-helpers
   api/openFoodFacts.ts  Barcode -> productdata
-  context/AuthContext.tsx  Ingelogde gebruiker
+  context/AuthContext.tsx  Ingelogde gebruiker + registreert dagelijkse activiteit
   data/workouts.ts      Vaste trainingscatalogus (18 workouts)
   types/food.ts         Gedeelde TypeScript-types (voeding)
   types/workout.ts       Gedeelde TypeScript-types (trainingen)
   types/profile.ts       Gedeeld TypeScript-type (gebruikersprofiel)
-functions/              Firebase Cloud Functions (estimateMealFromPhoto + generateWorkout -> Gemini)
+functions/              Firebase Cloud Functions (estimateMealFromPhoto + generateWorkout +
+                       generateWeeklyInsight -> Gemini)
 firestore.rules         Beveiligingsregels (plak in Firebase console)
 firebase.json / .firebaserc   Firebase CLI-configuratie (functions + firestore rules)
 ```
