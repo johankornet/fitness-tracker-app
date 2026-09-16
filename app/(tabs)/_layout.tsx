@@ -15,6 +15,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="diary" options={{ title: 'Dagboek' }} />
       <Tabs.Screen name="add" options={{ title: 'Toevoegen' }} />
+      <Tabs.Screen name="workouts" options={{ title: 'Trainingen' }} />
     </Tabs>
   );
 }

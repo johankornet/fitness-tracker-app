@@ -30,6 +30,14 @@ export default function RootLayout() {
             name="photo-scan"
             options={{ ...modalHeaderOptions, title: 'Foto van maaltijd' }}
           />
+          <Stack.Screen
+            name="workout-detail"
+            options={{ ...modalHeaderOptions, title: 'Training' }}
+          />
+          <Stack.Screen
+            name="ai-workout"
+            options={{ ...modalHeaderOptions, title: 'AI-training' }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

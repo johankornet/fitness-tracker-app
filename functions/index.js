@@ -9,51 +9,23 @@ const db = getFirestore();
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 const DAILY_PHOTO_SCAN_LIMIT = 20;
+const DAILY_WORKOUT_GENERATION_LIMIT = 20;
 const GEMINI_MODEL = 'gemini-3.8-flash';
 
-const RESPONSE_SCHEMA = {
-  type: 'object',
-  properties: {
-    foodName: { type: 'string' },
-    calories: { type: 'integer' },
-    protein: { type: 'integer' },
-    carbs: { type: 'integer' },
-    fat: { type: 'integer' },
-    confidence: { type: 'string', enum: ['laag', 'gemiddeld', 'hoog'] },
-  },
-  required: ['foodName', 'calories', 'protein', 'carbs', 'fat', 'confidence'],
-};
-
-const PROMPT = [
-  'Je bent een voedingsdeskundige. Kijk naar deze foto van een maaltijd of voedingsmiddel.',
-  'Schat de voedingswaarde voor de volledige afgebeelde portie.',
-  'calories in kcal, protein/carbs/fat in grammen, allemaal gehele getallen.',
-  'confidence geeft aan hoe zeker je bent van deze schatting gezien de foto.',
-].join(' ');
-
-async function estimateMealFromPhotoHandler(request) {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Je moet ingelogd zijn om deze functie te gebruiken.');
-  }
-
-  const { imageBase64 } = request.data ?? {};
-  if (!imageBase64 || typeof imageBase64 !== 'string') {
-    throw new HttpsError('invalid-argument', 'Geen foto ontvangen.');
-  }
-
-  const uid = request.auth.uid;
+async function checkAndIncrementUsage(uid, field, limit) {
   const today = new Date().toISOString().slice(0, 10);
   const usageRef = db.doc(`users/${uid}/usage/${today}`);
-
   const usageSnap = await usageRef.get();
-  const currentCount = usageSnap.exists ? usageSnap.data().photoScans ?? 0 : 0;
-  if (currentCount >= DAILY_PHOTO_SCAN_LIMIT) {
-    throw new HttpsError(
-      'resource-exhausted',
-      `Dagelijkse limiet van ${DAILY_PHOTO_SCAN_LIMIT} foto-scans bereikt.`
-    );
+  const currentCount = usageSnap.exists ? usageSnap.data()[field] ?? 0 : 0;
+
+  if (currentCount >= limit) {
+    throw new HttpsError('resource-exhausted', `Dagelijkse limiet van ${limit} bereikt.`);
   }
 
+  await usageRef.set({ [field]: currentCount + 1 }, { merge: true });
+}
+
+async function callGemini(inputParts, schema) {
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
     method: 'POST',
     headers: {
@@ -62,14 +34,11 @@ async function estimateMealFromPhotoHandler(request) {
     },
     body: JSON.stringify({
       model: GEMINI_MODEL,
-      input: [
-        { type: 'text', text: PROMPT },
-        { type: 'image', data: imageBase64, mime_type: 'image/jpeg' },
-      ],
+      input: inputParts,
       response_format: {
         type: 'text',
         mime_type: 'application/json',
-        schema: RESPONSE_SCHEMA,
+        schema,
       },
     }),
   });
@@ -89,30 +58,125 @@ async function estimateMealFromPhotoHandler(request) {
     throw new HttpsError('internal', 'Geen bruikbaar antwoord van AI ontvangen.');
   }
 
-  let parsed;
   try {
-    parsed = JSON.parse(textContent);
+    return JSON.parse(textContent);
   } catch (err) {
     console.error('Kon Gemini-antwoord niet parsen', textContent);
     throw new HttpsError('internal', 'Kon AI-antwoord niet verwerken.');
   }
-
-  await usageRef.set({ photoScans: currentCount + 1 }, { merge: true });
-
-  return parsed;
 }
 
-exports.estimateMealFromPhoto = onCall(
-  { secrets: [geminiApiKey], region: 'europe-west1' },
-  async (request) => {
+function wrapCallable(handler, fallbackMessage) {
+  return async (request) => {
     try {
-      return await estimateMealFromPhotoHandler(request);
+      return await handler(request);
     } catch (err) {
       if (err instanceof HttpsError) {
         throw err;
       }
-      console.error('Onverwachte fout in estimateMealFromPhoto', err);
-      throw new HttpsError('internal', 'Er ging iets mis bij het analyseren van de foto.');
+      console.error(fallbackMessage, err);
+      throw new HttpsError('internal', fallbackMessage);
     }
+  };
+}
+
+const MEAL_PHOTO_SCHEMA = {
+  type: 'object',
+  properties: {
+    foodName: { type: 'string' },
+    calories: { type: 'integer' },
+    protein: { type: 'integer' },
+    carbs: { type: 'integer' },
+    fat: { type: 'integer' },
+    confidence: { type: 'string', enum: ['laag', 'gemiddeld', 'hoog'] },
+  },
+  required: ['foodName', 'calories', 'protein', 'carbs', 'fat', 'confidence'],
+};
+
+const MEAL_PHOTO_PROMPT = [
+  'Je bent een voedingsdeskundige. Kijk naar deze foto van een maaltijd of voedingsmiddel.',
+  'Schat de voedingswaarde voor de volledige afgebeelde portie.',
+  'calories in kcal, protein/carbs/fat in grammen, allemaal gehele getallen.',
+  'confidence geeft aan hoe zeker je bent van deze schatting gezien de foto.',
+].join(' ');
+
+async function estimateMealFromPhotoHandler(request) {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Je moet ingelogd zijn om deze functie te gebruiken.');
   }
+
+  const { imageBase64 } = request.data ?? {};
+  if (!imageBase64 || typeof imageBase64 !== 'string') {
+    throw new HttpsError('invalid-argument', 'Geen foto ontvangen.');
+  }
+
+  await checkAndIncrementUsage(request.auth.uid, 'photoScans', DAILY_PHOTO_SCAN_LIMIT);
+
+  return callGemini(
+    [
+      { type: 'text', text: MEAL_PHOTO_PROMPT },
+      { type: 'image', data: imageBase64, mime_type: 'image/jpeg' },
+    ],
+    MEAL_PHOTO_SCHEMA
+  );
+}
+
+const WORKOUT_SCHEMA = {
+  type: 'object',
+  properties: {
+    title: { type: 'string' },
+    durationMinutes: { type: 'integer' },
+    difficulty: { type: 'string', enum: ['beginner', 'gemiddeld', 'gevorderd'] },
+    description: { type: 'string' },
+    exercises: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          detail: { type: 'string' },
+        },
+        required: ['name', 'detail'],
+      },
+    },
+  },
+  required: ['title', 'durationMinutes', 'difficulty', 'description', 'exercises'],
+};
+
+const VALID_SPORTS = ['hardlopen', 'kracht', 'yoga', 'cardio', 'hiit', 'wandelen', 'fietsen', 'zwemmen'];
+const VALID_GOALS = ['afvallen', 'spieropbouw', 'uithoudingsvermogen', 'mobiliteit', 'algemene_fitheid'];
+
+async function generateWorkoutHandler(request) {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Je moet ingelogd zijn om deze functie te gebruiken.');
+  }
+
+  const { sport, goal } = request.data ?? {};
+  if (!VALID_SPORTS.includes(sport) || !VALID_GOALS.includes(goal)) {
+    throw new HttpsError('invalid-argument', 'Ongeldige sport of doel.');
+  }
+
+  await checkAndIncrementUsage(request.auth.uid, 'workoutGenerations', DAILY_WORKOUT_GENERATION_LIMIT);
+
+  const prompt = [
+    'Je bent een personal trainer. Bedenk een concrete, uitvoerbare training.',
+    `Sport/type: ${sport}. Doel: ${goal}.`,
+    'Geef een titel, duur in minuten, moeilijkheidsgraad (beginner/gemiddeld/gevorderd),',
+    'een korte beschrijving (1-2 zinnen), en een lijst van 3 tot 6 oefeningen.',
+    'Elke oefening heeft een naam en een concreet detail (bv. "3 x 12 herhalingen" of "10 minuten").',
+    'Schrijf alles in het Nederlands.',
+  ].join(' ');
+
+  const workout = await callGemini([{ type: 'text', text: prompt }], WORKOUT_SCHEMA);
+  return { ...workout, sport, goal };
+}
+
+exports.estimateMealFromPhoto = onCall(
+  { secrets: [geminiApiKey], region: 'europe-west1' },
+  wrapCallable(estimateMealFromPhotoHandler, 'Er ging iets mis bij het analyseren van de foto.')
+);
+
+exports.generateWorkout = onCall(
+  { secrets: [geminiApiKey], region: 'europe-west1' },
+  wrapCallable(generateWorkoutHandler, 'Er ging iets mis bij het genereren van de training.')
 );
