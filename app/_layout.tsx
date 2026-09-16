@@ -42,6 +42,10 @@ export default function RootLayout() {
             name="edit-profile"
             options={{ ...modalHeaderOptions, title: 'Profiel bewerken' }}
           />
+          <Stack.Screen
+            name="change-password"
+            options={{ ...modalHeaderOptions, title: 'Wachtwoord wijzigen' }}
+          />
         </Stack>
       </AuthProvider>
     </SafeAreaProvider>

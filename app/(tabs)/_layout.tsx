@@ -48,6 +48,15 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Instellingen',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'cog' : 'cog-outline'} color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

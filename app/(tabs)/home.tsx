@@ -128,6 +128,14 @@ export default function HomeScreen() {
           <Text style={styles.navCardSubtitle}>Kies een training of laat AI er een maken</Text>
         </View>
       </Pressable>
+
+      <Pressable style={styles.navCard} onPress={() => router.push('/(tabs)/settings')}>
+        <Text style={styles.navCardIcon}>⚙️</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.navCardTitle}>Instellingen</Text>
+          <Text style={styles.navCardSubtitle}>Account, profiel en app-info</Text>
+        </View>
+      </Pressable>
     </ScrollView>
   );
 }
