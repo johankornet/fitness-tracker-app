@@ -26,7 +26,11 @@ export default function DiaryScreen() {
   }, [user]);
 
   const totalCalories = entries.reduce((sum, entry) => sum + entry.calories, 0);
+  const totalProtein = entries.reduce((sum, entry) => sum + entry.protein, 0);
+  const totalCarbs = entries.reduce((sum, entry) => sum + entry.carbs, 0);
+  const totalFat = entries.reduce((sum, entry) => sum + entry.fat, 0);
   const remaining = dailyGoal - totalCalories;
+  const progressPercent = Math.min(100, Math.max(0, (totalCalories / dailyGoal) * 100));
 
   const sections = MEAL_TYPES.map((type) => ({
     type,
@@ -54,21 +58,6 @@ export default function DiaryScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.summary}>
-        <Text style={styles.summaryLabel}>Vandaag</Text>
-        <Text style={styles.summaryCalories}>
-          {totalCalories} <Text style={styles.summaryCaloriesMuted}>/ {dailyGoal} kcal</Text>
-        </Text>
-        <Text style={[styles.summaryRemaining, remaining < 0 && styles.summaryRemainingOver]}>
-          {remaining >= 0 ? `${remaining} kcal over` : `${-remaining} kcal boven doel`}
-        </Text>
-        <Pressable onPress={openGoalEditor} hitSlop={8}>
-          <Text style={styles.editGoalLink}>Doel aanpassen</Text>
-        </Pressable>
-      </View>
-
-      <FastingCard />
-
       <Modal visible={editingGoal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -94,12 +83,53 @@ export default function DiaryScreen() {
       </Modal>
 
       <ScrollView contentContainerStyle={styles.list}>
+        <View style={styles.todayCard}>
+          <View style={styles.todayHeaderRow}>
+            <Text style={styles.todayLabel}>VANDAAG</Text>
+            <Pressable onPress={openGoalEditor} hitSlop={8}>
+              <Text style={styles.editGoalLink}>Doel aanpassen</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.caloriesRow}>
+            <Text style={styles.caloriesValue}>{totalCalories}</Text>
+            <Text style={styles.caloriesGoal}>/ {dailyGoal} kcal</Text>
+          </View>
+
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
+          </View>
+          <Text style={[styles.remainingText, remaining < 0 && styles.remainingOver]}>
+            {remaining >= 0 ? `${remaining} kcal over` : `${-remaining} kcal boven doel`}
+          </Text>
+
+          <View style={styles.divider} />
+
+          <View style={styles.macroRow}>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{totalProtein}g</Text>
+              <Text style={styles.macroLabel}>Eiwit</Text>
+            </View>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{totalCarbs}g</Text>
+              <Text style={styles.macroLabel}>Koolhydraten</Text>
+            </View>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{totalFat}g</Text>
+              <Text style={styles.macroLabel}>Vet</Text>
+            </View>
+          </View>
+        </View>
+
         {sections.map((section) => {
           const sectionTotal = section.entries.reduce((sum, e) => sum + e.calories, 0);
           return (
             <View key={section.type} style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{section.label}</Text>
+                <View style={styles.sectionTitleRow}>
+                  <Ionicons name="restaurant-outline" size={15} color={colors.accent} />
+                  <Text style={styles.sectionTitle}>{section.label}</Text>
+                </View>
                 <Text style={styles.sectionTotal}>{sectionTotal} kcal</Text>
               </View>
 
@@ -131,6 +161,8 @@ export default function DiaryScreen() {
           );
         })}
 
+        <FastingCard />
+
         <Pressable
           style={styles.signOut}
           onPress={async () => {
@@ -151,25 +183,6 @@ export default function DiaryScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  summary: {
-    padding: 20,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    alignItems: 'center',
-  },
-  summaryLabel: { color: colors.textSecondary, fontSize: 14 },
-  summaryCalories: { color: colors.textPrimary, fontSize: 30, fontWeight: '700', marginTop: 4 },
-  summaryCaloriesMuted: { color: colors.textSecondary, fontSize: 18, fontWeight: '400' },
-  summaryRemaining: { color: colors.success, fontSize: 14, marginTop: 4, fontWeight: '600' },
-  summaryRemainingOver: { color: colors.danger },
-  editGoalLink: {
-    color: colors.accentLight,
-    fontSize: 13,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-    marginTop: 10,
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.65)',
@@ -205,13 +218,43 @@ const styles = StyleSheet.create({
   },
   modalSaveText: { color: colors.white, fontWeight: '600' },
   list: { padding: 16, paddingBottom: 100, gap: 20 },
+
+  todayCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 18,
+    padding: 20,
+  },
+  todayHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  todayLabel: { color: colors.textSecondary, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
+  caloriesRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 6 },
+  caloriesValue: { color: colors.textPrimary, fontSize: 36, fontWeight: '700', letterSpacing: -0.5 },
+  caloriesGoal: { color: colors.textMuted, fontSize: 16 },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.surfaceAlt,
+    marginTop: 12,
+    overflow: 'hidden',
+  },
+  progressFill: { height: '100%', borderRadius: 3, backgroundColor: colors.accent },
+  remainingText: { color: colors.success, fontSize: 13, fontWeight: '600', marginTop: 8 },
+  remainingOver: { color: colors.danger },
+  divider: { height: 1, backgroundColor: colors.border, marginVertical: 16 },
+  macroRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  macroItem: { alignItems: 'center', flex: 1 },
+  macroValue: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  macroLabel: { color: colors.textSecondary, fontSize: 11, marginTop: 2 },
+
+  editGoalLink: { color: colors.accentLight, fontSize: 13, fontWeight: '600' },
+
   section: {},
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
+    alignItems: 'center',
     marginBottom: 8,
   },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   sectionTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
   sectionTotal: { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
   sectionEmpty: { color: colors.textMuted, fontSize: 13, fontStyle: 'italic', marginBottom: 8 },
@@ -221,8 +264,6 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
     marginBottom: 8,
   },
   entryName: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },

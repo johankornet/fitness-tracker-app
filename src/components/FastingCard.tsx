@@ -80,11 +80,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: 18,
-    margin: 16,
-    marginBottom: 0,
   },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
