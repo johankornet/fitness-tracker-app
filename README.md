@@ -106,6 +106,9 @@ telefoon en computer op hetzelfde wifinetwerk zitten.
     training — controleer dat 'm daarna terugkomt in de trainingenlijst (met AI-label).
 12. Log uit en weer in — alle gegevens (profiel, dagboek, trainingen én weekoverzicht)
     moeten behouden blijven.
+13. Ga naar "Instellingen" (tandwiel-tab, of de kaart op Home): test "Wachtwoord wijzigen"
+    (vereist je huidige wachtwoord) en controleer dat "Profiel bewerken" naar hetzelfde
+    scherm gaat als vanaf Home.
 
 ## 6. Projectstructuur
 
@@ -122,6 +125,8 @@ app/                  Schermen (Expo Router file-based routing)
   workout-detail.tsx    Details van één training + verwijderen (AI-workouts)
   ai-workout.tsx        Sport + doel -> AI-training (Cloud Function) + bewaren
   edit-profile.tsx      Naam/leeftijd/lengte/gewicht/sport/doel/caloriedoel bewerken
+  (tabs)/settings.tsx   Instellingen: account, wachtwoord, link naar profiel/doelen, app-info
+  change-password.tsx   Wachtwoord wijzigen (met re-authenticatie)
 src/
   firebase/            Firebase-init, auth-, Firestore-, Functions-, workouts-, profile-,
                        activity- en insights-helpers
