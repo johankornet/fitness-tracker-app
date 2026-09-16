@@ -23,3 +23,13 @@ export async function saveWorkout(uid: string, workout: Omit<Workout, 'id'>) {
 export async function deleteWorkout(uid: string, workoutId: string) {
   await deleteDoc(doc(db, 'users', uid, 'workouts', workoutId));
 }
+
+export async function logWorkoutCompletion(uid: string, workout: Pick<Workout, 'id' | 'title' | 'sport'>) {
+  const ref = collection(db, 'users', uid, 'workoutCompletions');
+  await addDoc(ref, {
+    workoutId: workout.id,
+    title: workout.title,
+    sport: workout.sport,
+    completedAt: Date.now(),
+  });
+}

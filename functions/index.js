@@ -10,7 +10,9 @@ const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 const DAILY_PHOTO_SCAN_LIMIT = 20;
 const DAILY_WORKOUT_GENERATION_LIMIT = 20;
+const DAILY_INSIGHT_GENERATION_LIMIT = 5;
 const GEMINI_MODEL = 'gemini-3.8-flash';
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 async function checkAndIncrementUsage(uid, field, limit) {
   const today = new Date().toISOString().slice(0, 10);
@@ -171,6 +173,71 @@ async function generateWorkoutHandler(request) {
   return { ...workout, sport, goal };
 }
 
+const INSIGHT_SCHEMA = {
+  type: 'object',
+  properties: {
+    message: { type: 'string' },
+  },
+  required: ['message'],
+};
+
+async function generateWeeklyInsightHandler(request) {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'Je moet ingelogd zijn om deze functie te gebruiken.');
+  }
+
+  const uid = request.auth.uid;
+  const today = new Date().toISOString().slice(0, 10);
+  const insightRef = db.doc(`users/${uid}/insights/${today}`);
+
+  const cached = await insightRef.get();
+  if (cached.exists) {
+    return cached.data();
+  }
+
+  await checkAndIncrementUsage(uid, 'insightGenerations', DAILY_INSIGHT_GENERATION_LIMIT);
+
+  const since = Date.now() - SEVEN_DAYS_MS;
+
+  const [profileSnap, activitySnap, entriesSnap, completionsSnap] = await Promise.all([
+    db.doc(`users/${uid}`).get(),
+    db.collection(`users/${uid}/activity`).where('timestamp', '>=', since).get(),
+    db.collection(`users/${uid}/entries`).where('loggedAt', '>=', since).get(),
+    db.collection(`users/${uid}/workoutCompletions`).where('completedAt', '>=', since).get(),
+  ]);
+
+  const profile = profileSnap.exists ? profileSnap.data() : {};
+  const daysActive = activitySnap.size;
+  const loggedDays = new Set(
+    entriesSnap.docs.map((d) => new Date(d.data().loggedAt).toISOString().slice(0, 10))
+  );
+  const daysLogged = loggedDays.size;
+  const workoutsCompleted = completionsSnap.size;
+
+  const stats = { daysActive, daysLogged, workoutsCompleted };
+
+  const prompt = [
+    'Je bent een vriendelijke, motiverende personal coach binnen de app StriveGen.',
+    `Gebruikersnaam: ${profile.name || 'onbekend'}.`,
+    profile.sport ? `Favoriete sport: ${profile.sport}.` : '',
+    profile.goal ? `Doel: ${profile.goal}.` : '',
+    'Statistieken van de afgelopen 7 dagen:',
+    `- Dagen actief in de app: ${daysActive} van de 7`,
+    `- Dagen met voeding gelogd: ${daysLogged} van de 7`,
+    `- Voltooide trainingen: ${workoutsCompleted}`,
+    'Schrijf een korte, persoonlijke welkomsttekst (2-4 zinnen) in het Nederlands voor op het',
+    'homescherm: benoem kort de voortgang, geef een concrete tip of bemoediging, en gebruik een',
+    'positieve, motiverende toon. Gebruik de naam als die bekend is. Geen opsomming, gewoon lopende tekst.',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const result = await callGemini([{ type: 'text', text: prompt }], INSIGHT_SCHEMA);
+  const payload = { message: result.message, stats, generatedAt: Date.now() };
+  await insightRef.set(payload);
+  return payload;
+}
+
 exports.estimateMealFromPhoto = onCall(
   { secrets: [geminiApiKey], region: 'europe-west1' },
   wrapCallable(estimateMealFromPhotoHandler, 'Er ging iets mis bij het analyseren van de foto.')
@@ -179,4 +246,9 @@ exports.estimateMealFromPhoto = onCall(
 exports.generateWorkout = onCall(
   { secrets: [geminiApiKey], region: 'europe-west1' },
   wrapCallable(generateWorkoutHandler, 'Er ging iets mis bij het genereren van de training.')
+);
+
+exports.generateWeeklyInsight = onCall(
+  { secrets: [geminiApiKey], region: 'europe-west1' },
+  wrapCallable(generateWeeklyInsightHandler, 'Er ging iets mis bij het ophalen van je overzicht.')
 );

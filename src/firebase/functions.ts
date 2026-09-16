@@ -34,3 +34,23 @@ export async function generateWorkout(sport: Sport, goal: Goal): Promise<Generat
   const result = await generateWorkoutCallable({ sport, goal });
   return result.data;
 }
+
+export interface WeeklyInsight {
+  message: string;
+  stats: {
+    daysActive: number;
+    daysLogged: number;
+    workoutsCompleted: number;
+  };
+  generatedAt: number;
+}
+
+const generateWeeklyInsightCallable = httpsCallable<void, WeeklyInsight>(
+  functions,
+  'generateWeeklyInsight'
+);
+
+export async function generateWeeklyInsight(): Promise<WeeklyInsight> {
+  const result = await generateWeeklyInsightCallable();
+  return result.data;
+}

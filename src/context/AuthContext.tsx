@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { recordActivity } from '../firebase/activity';
 
 interface AuthContextValue {
   user: User | null;
@@ -20,6 +21,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser);
       setInitializing(false);
+      if (nextUser) {
+        recordActivity(nextUser.uid).catch(() => {});
+      }
     });
   }, []);
 
