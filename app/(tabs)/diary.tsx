@@ -8,6 +8,7 @@ import { getUserProfile, updateUserProfile } from '../../src/firebase/profile';
 import { signOut } from '../../src/firebase/auth';
 import { MEAL_TYPES, MEAL_TYPE_LABELS } from '../../src/types/food';
 import type { FoodEntry, MealType } from '../../src/types/food';
+import { FastingCard } from '../../src/components/FastingCard';
 import { colors } from '../../src/theme/colors';
 
 export default function DiaryScreen() {
@@ -65,6 +66,8 @@ export default function DiaryScreen() {
           <Text style={styles.editGoalLink}>Doel aanpassen</Text>
         </Pressable>
       </View>
+
+      <FastingCard />
 
       <Modal visible={editingGoal} transparent animationType="fade">
         <View style={styles.modalOverlay}>

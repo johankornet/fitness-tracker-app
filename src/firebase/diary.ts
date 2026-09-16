@@ -1,4 +1,14 @@
-import { collection, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy } from 'firebase/firestore';
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 import { db } from './config';
 import type { FoodEntry, NewFoodEntry } from '../types/food';
 
@@ -45,4 +55,14 @@ export async function addFoodEntry(uid: string, entry: NewFoodEntry) {
 
 export async function deleteFoodEntry(uid: string, entryId: string) {
   await deleteDoc(doc(db, 'users', uid, 'entries', entryId));
+}
+
+export function subscribeToLastEntryTimestamp(uid: string, onChange: (loggedAt: number | null) => void) {
+  const entriesRef = collection(db, 'users', uid, 'entries');
+  const lastEntryQuery = query(entriesRef, orderBy('loggedAt', 'desc'), limit(1));
+
+  return onSnapshot(lastEntryQuery, (snapshot) => {
+    const firstDoc = snapshot.docs[0];
+    onChange(firstDoc ? (firstDoc.data().loggedAt as number) : null);
+  });
 }
