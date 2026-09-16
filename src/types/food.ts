@@ -1,5 +1,24 @@
 export type EntrySource = 'manual' | 'barcode' | 'photo';
 
+export type MealType = 'ontbijt' | 'lunch' | 'diner' | 'snacks';
+
+export const MEAL_TYPES: MealType[] = ['ontbijt', 'lunch', 'diner', 'snacks'];
+
+export const MEAL_TYPE_LABELS: Record<MealType, string> = {
+  ontbijt: 'Ontbijt',
+  lunch: 'Lunch',
+  diner: 'Diner',
+  snacks: 'Snacks',
+};
+
+export function suggestMealTypeForNow(): MealType {
+  const hour = new Date().getHours();
+  if (hour < 11) return 'ontbijt';
+  if (hour < 15) return 'lunch';
+  if (hour < 21) return 'diner';
+  return 'snacks';
+}
+
 export interface FoodEntry {
   id: string;
   foodName: string;
@@ -10,6 +29,7 @@ export interface FoodEntry {
   servingQty: number;
   loggedAt: number;
   source: EntrySource;
+  mealType?: MealType;
   barcode?: string;
 }
 
@@ -21,6 +41,7 @@ export interface NewFoodEntry {
   fat: number;
   servingQty: number;
   source: EntrySource;
+  mealType: MealType;
   barcode?: string;
 }
 

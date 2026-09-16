@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet, Modal, TextInput } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Modal, TextInput } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { useAuth } from '../../src/context/AuthContext';
 import { subscribeToTodayEntries, deleteFoodEntry } from '../../src/firebase/diary';
 import { getUserProfile, updateUserProfile } from '../../src/firebase/profile';
 import { signOut } from '../../src/firebase/auth';
-import type { FoodEntry } from '../../src/types/food';
+import { MEAL_TYPES, MEAL_TYPE_LABELS } from '../../src/types/food';
+import type { FoodEntry, MealType } from '../../src/types/food';
 import { colors } from '../../src/theme/colors';
 
 export default function DiaryScreen() {
@@ -25,6 +27,12 @@ export default function DiaryScreen() {
   const totalCalories = entries.reduce((sum, entry) => sum + entry.calories, 0);
   const remaining = dailyGoal - totalCalories;
 
+  const sections = MEAL_TYPES.map((type) => ({
+    type,
+    label: MEAL_TYPE_LABELS[type],
+    entries: entries.filter((entry) => (entry.mealType ?? 'snacks') === type),
+  }));
+
   function openGoalEditor() {
     setGoalInput(String(dailyGoal));
     setEditingGoal(true);
@@ -37,6 +45,10 @@ export default function DiaryScreen() {
     await updateUserProfile(user.uid, { dailyCalorieGoal: parsed });
     setDailyGoal(parsed);
     setEditingGoal(false);
+  }
+
+  function goToAdd(mealType?: MealType) {
+    router.push({ pathname: '/(tabs)/add', params: mealType ? { mealType } : {} });
   }
 
   return (
@@ -78,37 +90,57 @@ export default function DiaryScreen() {
         </View>
       </Modal>
 
-      <FlatList
-        data={entries}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <Text style={styles.empty}>Nog niets gelogd vandaag. Ga naar "Toevoegen".</Text>
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.entryRow}
-            onLongPress={() => user && deleteFoodEntry(user.uid, item.id)}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={styles.entryName}>{item.foodName}</Text>
-              <Text style={styles.entryMacros}>
-                P {item.protein}g · K {item.carbs}g · V {item.fat}g
-              </Text>
-            </View>
-            <Text style={styles.entryCalories}>{item.calories} kcal</Text>
-          </Pressable>
-        )}
-      />
+      <ScrollView contentContainerStyle={styles.list}>
+        {sections.map((section) => {
+          const sectionTotal = section.entries.reduce((sum, e) => sum + e.calories, 0);
+          return (
+            <View key={section.type} style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>{section.label}</Text>
+                <Text style={styles.sectionTotal}>{sectionTotal} kcal</Text>
+              </View>
 
-      <Pressable
-        style={styles.signOut}
-        onPress={async () => {
-          await signOut();
-          router.replace('/(auth)/login');
-        }}
-      >
-        <Text style={styles.signOutText}>Uitloggen</Text>
+              {section.entries.length === 0 ? (
+                <Text style={styles.sectionEmpty}>Nog niets gelogd.</Text>
+              ) : (
+                section.entries.map((item) => (
+                  <Pressable
+                    key={item.id}
+                    style={styles.entryRow}
+                    onLongPress={() => user && deleteFoodEntry(user.uid, item.id)}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.entryName}>{item.foodName}</Text>
+                      <Text style={styles.entryMacros}>
+                        P {item.protein}g · K {item.carbs}g · V {item.fat}g
+                      </Text>
+                    </View>
+                    <Text style={styles.entryCalories}>{item.calories} kcal</Text>
+                  </Pressable>
+                ))
+              )}
+
+              <Pressable style={styles.sectionAddButton} onPress={() => goToAdd(section.type)}>
+                <Ionicons name="add" size={16} color={colors.accentLight} />
+                <Text style={styles.sectionAddText}>Snel toevoegen aan {section.label.toLowerCase()}</Text>
+              </Pressable>
+            </View>
+          );
+        })}
+
+        <Pressable
+          style={styles.signOut}
+          onPress={async () => {
+            await signOut();
+            router.replace('/(auth)/login');
+          }}
+        >
+          <Text style={styles.signOutText}>Uitloggen</Text>
+        </Pressable>
+      </ScrollView>
+
+      <Pressable style={styles.fab} onPress={() => goToAdd()}>
+        <Ionicons name="add" size={30} color={colors.white} />
       </Pressable>
     </View>
   );
@@ -169,8 +201,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   modalSaveText: { color: colors.white, fontWeight: '600' },
-  list: { padding: 16, gap: 8 },
-  empty: { textAlign: 'center', color: colors.textMuted, marginTop: 32 },
+  list: { padding: 16, paddingBottom: 100, gap: 20 },
+  section: {},
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 8,
+  },
+  sectionTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  sectionTotal: { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
+  sectionEmpty: { color: colors.textMuted, fontSize: 13, fontStyle: 'italic', marginBottom: 8 },
   entryRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -184,6 +225,30 @@ const styles = StyleSheet.create({
   entryName: { fontSize: 16, fontWeight: '600', color: colors.textPrimary },
   entryMacros: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
   entryCalories: { fontSize: 16, fontWeight: '700', color: colors.accentLight },
+  sectionAddButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+  },
+  sectionAddText: { color: colors.accentLight, fontSize: 13, fontWeight: '600' },
   signOut: { padding: 16, alignItems: 'center' },
   signOutText: { color: colors.danger, fontWeight: '600' },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
 });

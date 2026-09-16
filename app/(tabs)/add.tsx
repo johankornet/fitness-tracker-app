@@ -3,7 +3,12 @@ import { View, Text, TextInput, Pressable, StyleSheet, ScrollView } from 'react-
 import { router, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { addFoodEntry } from '../../src/firebase/diary';
+import { MEAL_TYPES, MEAL_TYPE_LABELS, suggestMealTypeForNow } from '../../src/types/food';
+import type { MealType } from '../../src/types/food';
+import { ChipPicker } from '../../src/components/ChipPicker';
 import { colors } from '../../src/theme/colors';
+
+const MEAL_TYPE_OPTIONS = MEAL_TYPES.map((value) => ({ value, label: MEAL_TYPE_LABELS[value] }));
 
 export default function AddScreen() {
   const { user } = useAuth();
@@ -15,6 +20,7 @@ export default function AddScreen() {
     fat?: string;
     barcode?: string;
     photoConfidence?: string;
+    mealType?: string;
   }>();
 
   const [foodName, setFoodName] = useState('');
@@ -24,6 +30,7 @@ export default function AddScreen() {
   const [fat, setFat] = useState('');
   const [barcode, setBarcode] = useState<string | undefined>(undefined);
   const [photoConfidence, setPhotoConfidence] = useState<string | undefined>(undefined);
+  const [mealType, setMealType] = useState<MealType>(suggestMealTypeForNow());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,6 +42,9 @@ export default function AddScreen() {
     if (params.fat) setFat(params.fat);
     if (params.barcode) setBarcode(params.barcode);
     if (params.photoConfidence) setPhotoConfidence(params.photoConfidence);
+    if (params.mealType && MEAL_TYPES.includes(params.mealType as MealType)) {
+      setMealType(params.mealType as MealType);
+    }
   }, [
     params.name,
     params.calories,
@@ -43,6 +53,7 @@ export default function AddScreen() {
     params.fat,
     params.barcode,
     params.photoConfidence,
+    params.mealType,
   ]);
 
   function resetForm() {
@@ -53,6 +64,7 @@ export default function AddScreen() {
     setFat('');
     setBarcode(undefined);
     setPhotoConfidence(undefined);
+    setMealType(suggestMealTypeForNow());
     router.setParams({
       name: '',
       calories: '',
@@ -61,6 +73,7 @@ export default function AddScreen() {
       fat: '',
       barcode: '',
       photoConfidence: '',
+      mealType: '',
     });
   }
 
@@ -83,6 +96,7 @@ export default function AddScreen() {
         carbs: Number(carbs) || 0,
         fat: Number(fat) || 0,
         servingQty: 1,
+        mealType,
         source: barcode ? 'barcode' : photoConfidence ? 'photo' : 'manual',
         ...(barcode ? { barcode } : {}),
       });
@@ -97,6 +111,9 @@ export default function AddScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.label}>Maaltijd</Text>
+      <ChipPicker options={MEAL_TYPE_OPTIONS} value={mealType} onChange={(v) => v && setMealType(v)} />
+
       <View style={styles.scanRow}>
         <Pressable
           style={[styles.scanButton, styles.scanButtonHalf]}
@@ -174,6 +191,7 @@ export default function AddScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20, gap: 12, backgroundColor: colors.background, flexGrow: 1 },
+  label: { color: colors.textPrimary, fontWeight: '700' },
   scanRow: { flexDirection: 'row', gap: 8 },
   scanButton: {
     backgroundColor: colors.surfaceAlt,
