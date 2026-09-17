@@ -12,6 +12,7 @@ interface ChipPickerProps<T extends string> {
   onChange: (value: T | null) => void;
   allowClear?: boolean;
   clearLabel?: string;
+  compact?: boolean;
 }
 
 export function ChipPicker<T extends string>({
@@ -20,24 +21,29 @@ export function ChipPicker<T extends string>({
   onChange,
   allowClear,
   clearLabel = 'Alles',
+  compact,
 }: ChipPickerProps<T>) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       {allowClear && (
         <Pressable
-          style={[styles.chip, value === null && styles.chipActive]}
+          style={[styles.chip, compact && styles.chipCompact, value === null && styles.chipActive]}
           onPress={() => onChange(null)}
         >
-          <Text style={[styles.chipText, value === null && styles.chipTextActive]}>{clearLabel}</Text>
+          <Text style={[styles.chipText, compact && styles.chipTextCompact, value === null && styles.chipTextActive]}>
+            {clearLabel}
+          </Text>
         </Pressable>
       )}
       {options.map((opt) => (
         <Pressable
           key={opt.value}
-          style={[styles.chip, value === opt.value && styles.chipActive]}
+          style={[styles.chip, compact && styles.chipCompact, value === opt.value && styles.chipActive]}
           onPress={() => onChange(opt.value)}
         >
-          <Text style={[styles.chipText, value === opt.value && styles.chipTextActive]}>
+          <Text
+            style={[styles.chipText, compact && styles.chipTextCompact, value === opt.value && styles.chipTextActive]}
+          >
             {opt.label}
           </Text>
         </Pressable>
@@ -56,7 +62,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  chipCompact: { paddingHorizontal: 10, paddingVertical: 5 },
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   chipText: { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
+  chipTextCompact: { fontSize: 12 },
   chipTextActive: { color: colors.white },
 });

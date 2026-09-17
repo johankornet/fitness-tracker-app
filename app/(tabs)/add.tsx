@@ -112,7 +112,12 @@ export default function AddScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.label}>Maaltijd</Text>
-      <ChipPicker options={MEAL_TYPE_OPTIONS} value={mealType} onChange={(v) => v && setMealType(v)} />
+      <ChipPicker
+        options={MEAL_TYPE_OPTIONS}
+        value={mealType}
+        onChange={(v) => v && setMealType(v)}
+        compact
+      />
 
       <View style={styles.scanRow}>
         <Pressable
