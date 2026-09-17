@@ -117,6 +117,7 @@ export default function AddScreen() {
         value={mealType}
         onChange={(v) => v && setMealType(v)}
         compact
+        fill
       />
 
       <View style={styles.scanRow}>

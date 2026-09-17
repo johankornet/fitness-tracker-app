@@ -1,4 +1,4 @@
-import { ScrollView, Pressable, Text, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, Text, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
 
 interface ChipOption<T extends string> {
@@ -13,6 +13,8 @@ interface ChipPickerProps<T extends string> {
   allowClear?: boolean;
   clearLabel?: string;
   compact?: boolean;
+  /** Render as equal-width columns filling the available width, instead of a scrollable row. */
+  fill?: boolean;
 }
 
 export function ChipPicker<T extends string>({
@@ -22,12 +24,18 @@ export function ChipPicker<T extends string>({
   allowClear,
   clearLabel = 'Alles',
   compact,
+  fill,
 }: ChipPickerProps<T>) {
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+  const chips = (
+    <>
       {allowClear && (
         <Pressable
-          style={[styles.chip, compact && styles.chipCompact, value === null && styles.chipActive]}
+          style={[
+            styles.chip,
+            compact && styles.chipCompact,
+            fill && styles.chipFill,
+            value === null && styles.chipActive,
+          ]}
           onPress={() => onChange(null)}
         >
           <Text style={[styles.chipText, compact && styles.chipTextCompact, value === null && styles.chipTextActive]}>
@@ -38,7 +46,12 @@ export function ChipPicker<T extends string>({
       {options.map((opt) => (
         <Pressable
           key={opt.value}
-          style={[styles.chip, compact && styles.chipCompact, value === opt.value && styles.chipActive]}
+          style={[
+            styles.chip,
+            compact && styles.chipCompact,
+            fill && styles.chipFill,
+            value === opt.value && styles.chipActive,
+          ]}
           onPress={() => onChange(opt.value)}
         >
           <Text
@@ -48,12 +61,23 @@ export function ChipPicker<T extends string>({
           </Text>
         </Pressable>
       ))}
+    </>
+  );
+
+  if (fill) {
+    return <View style={styles.rowFill}>{chips}</View>;
+  }
+
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      {chips}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { gap: 8, paddingVertical: 4 },
+  row: { gap: 8, paddingVertical: 4, alignItems: 'flex-start' },
+  rowFill: { flexDirection: 'row', gap: 8 },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -61,8 +85,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
     borderColor: colors.border,
+    alignItems: 'center',
   },
   chipCompact: { paddingHorizontal: 10, paddingVertical: 5 },
+  chipFill: { flex: 1, borderRadius: 10 },
   chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
   chipText: { color: colors.textSecondary, fontSize: 13, fontWeight: '600' },
   chipTextCompact: { fontSize: 12 },
